@@ -1,0 +1,8 @@
+# DevNet always-on IOS XE sandbox — public lab device, no reservation needed.
+# Credentials are Cisco's published demo login (developer / C1sco12345).
+# No password is stored here; the script still prompts for it at runtime.
+devices:
+  - host: sandbox-iosxe-latest-1.cisco.com
+    device_type: cisco_ios
+    username: developer
+    note: Cisco DevNet always-on IOS XE sandbox (CSR 1000v)

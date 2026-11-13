@@ -1,0 +1,7 @@
+# Python virtualenv + caches
+venv/
+__pycache__/
+*.pyc
+
+# Backup output — run artifacts, kept local (may contain device configs)
+backups/

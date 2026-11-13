@@ -1,0 +1,11 @@
+# Lab inventory — placeholder addresses only. Replace with your lab devices.
+# No passwords here, ever. The script prompts for the password at runtime.
+devices:
+  - host: 192.168.1.10
+    device_type: cisco_ios
+    username: admin
+    note: Lab switch 1 (Packet Tracer / GNS3)
+  - host: 192.168.1.11
+    device_type: cisco_ios
+    username: admin
+    note: Lab switch 2 (Packet Tracer / GNS3)
