@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 """
-backup_configs.py — Lab project: automated config backup with Netmiko.
+backup_configs.py — automated Cisco IOS config backup with Netmiko.
 
-What it does: connects to each Cisco IOS device in an inventory YAML over SSH,
-runs `show running-config`, and saves the output to backups/<hostname>_<date>.txt.
+Connects to each device in an inventory YAML over SSH, runs
+`show running-config`, and saves the output to
+backups/<hostname>_<date>.txt.
 
-Status: built 2026-11-12 for lab study ahead of the Vandis technical
-interview. Run it against Packet Tracer / GNS3 / a lab switch, or against
-Cisco's DevNet always-on IOS XE sandbox, then it becomes a real project
-you can defend in an interview.
-
-Requirements on the machine that runs it:
+Requirements:
     pip install netmiko pyyaml
 
 Usage:
