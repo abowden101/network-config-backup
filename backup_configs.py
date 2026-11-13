@@ -63,6 +63,11 @@ def backup_device(device, password):
         "host": device["host"],
         "username": device["username"],
         "password": password,
+        # The DevNet always-on sandbox is shared and slow; Netmiko's
+        # 10s default connect timeout is too tight for it.
+        "timeout": 60,
+        "auth_timeout": 30,
+        "conn_timeout": 30,
     }
     try:
         with ConnectHandler(**conn_info) as conn:

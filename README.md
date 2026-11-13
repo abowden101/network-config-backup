@@ -20,7 +20,7 @@ output to `backups/<hostname>_<date>.txt`. Read-only on the device: it runs
    with your lab devices, and set the right username.
    **Or skip the local lab:** `inventory-sandbox.yaml` points at Cisco's
    free DevNet always-on IOS XE sandbox (`sandbox-iosxe-latest-1.cisco.com`,
-   published demo login `developer` / `C1sco12345`) — run with
+   published demo login `admin` / `C1sco12345`) — run with
    `python backup_configs.py --inventory inventory-sandbox.yaml`.
    The script also accepts `--inventory <file>` for any other inventory.
 3. `python backup_configs.py` — type the SSH password when prompted.
@@ -32,10 +32,13 @@ output to `backups/<hostname>_<date>.txt`. Read-only on the device: it runs
    the resume: "Python (Netmiko) — automated Cisco config backups in a lab,
    version-controlled on GitHub."
 
-> Nov 13 note: running the script from Muse's VM against the sandbox was
-> tried and blocked — outbound SSH is turned off in Muse settings
-> (Settings → Permissions → Direct network access). Either enable that
-> setting and let Muse run it, or run it on your laptop.
+> Nov 13 update: first successful run — Nov 13, 2026, against the DevNet
+> sandbox (Catalyst 8000v "Cat8kv", IOS XE 17.15), saved as
+> `backups/Cat8kv_2026-11-13.txt` (183 lines). Two fixes landed that day:
+> the working sandbox login is `admin` (`developer` is rejected on this
+> host), and the script's timeouts were raised (30s connect / 60s command)
+> because the shared sandbox is slow — Netmiko's 10s default was too
+> tight. Run from Muse's VM with Direct network access enabled.
 
 ## Honesty gate — do not skip this
 
