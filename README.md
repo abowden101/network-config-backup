@@ -1,62 +1,106 @@
-# network-config-backup
+# Network Config Backup (Netmiko)
 
-Automated Cisco IOS running-config backup over SSH with Netmiko. Point it at an inventory of devices and it pulls `show running-config` (plus a `show version` uptime check) and saves a dated backup per device. Read-only on the device — it runs `show` commands only and writes nothing to any switch.
+Simple, reliable Cisco IOS/IOS-XE running-config backup tool built with Netmiko.
 
-## Requirements
+Point it at an inventory of devices and it:
+- Connects over SSH
+- Verifies the device is reachable
+- Pulls `show running-config`
+- Saves a timestamped backup per device
+- Continues on failure (one bad device doesn’t stop the rest)
 
-- Python 3.10+
-- `pip install netmiko pyyaml`
+**Read-only** — it only runs `show` commands. Nothing is written to the devices.
 
-## Usage
+---
 
-1. Edit `inventory.yaml` — one entry per device:
+## Features
+
+- Inventory-driven (YAML)
+- Password prompted at runtime (never stored)
+- Per-device timeout handling
+- Failure isolation
+- Works with Cisco DevNet always-on sandbox out of the box
+- Easy to extend for other platforms (Juniper, Arista, etc.)
+
+---
+
+## Quick Start
+
+### 1. Install dependencies
+```bash
+pip install netmiko pyyaml
+```
+
+### 2. Configure inventory
+Edit `inventory.yaml`:
 
 ```yaml
 devices:
   - host: 192.168.1.10
     device_type: cisco_ios
     username: admin
+  - host: 192.168.1.11
+    device_type: cisco_ios
+    username: admin
 ```
 
-2. Run it and type the SSH password when prompted (it is never written to a file):
-
-```
-python backup_configs.py [--inventory inventory.yaml]
-```
-
-3. Check `backups/` — one file per device, named `<hostname>_<date>.txt`. Run it again after a config change and `diff` the two files to see drift:
-
-```
-diff backups/Cat8kv_2026-11-12.txt backups/Cat8kv_2026-11-13.txt
+### 3. Run the backup
+```bash
+python backup_configs.py
 ```
 
-## Try it without hardware
-
-`inventory-sandbox.yaml` points at Cisco's free DevNet always-on IOS XE sandbox (`sandbox-iosxe-latest-1.cisco.com`, Catalyst 8000v). The published demo login is `admin` / `C1sco12345`:
+You will be prompted for the SSH password once. Backups are saved in the `backups/` folder as:
 
 ```
+<hostname>_YYYY-MM-DD.txt
+```
+
+---
+
+## Try It Instantly (No Lab Required)
+
+Use Cisco’s free always-on IOS-XE sandbox:
+
+```bash
 python backup_configs.py --inventory inventory-sandbox.yaml
 ```
 
-Verified 2026-11-13 against the sandbox (IOS XE 17.15): a 183-line running-config backup saved for `Cat8kv`.
+Credentials are already in the sandbox inventory file (`admin` / `C1sco12345`).
 
-## How it works
+---
 
-- One SSH session per device via Netmiko (`cisco_ios`).
-- Verifies the connection first with `show version | include uptime` and the device prompt before trusting the output.
-- Timeouts are tuned for slow or shared devices (30s connect, 60s command).
-- A failure on one device is reported and the run continues with the rest.
-- Credentials are never stored: the username comes from the inventory file, the password is prompted at runtime with `getpass`.
-
-## Project structure
+## Example Output
 
 ```
-backup_configs.py       # the backup script
-inventory.yaml          # your lab devices (placeholder addresses)
-inventory-sandbox.yaml  # Cisco DevNet always-on IOS XE sandbox
-backups/                # generated backups (git-ignored)
+[+] Connecting to Cat8kv (sandbox-iosxe-latest-1.cisco.com)...
+[+] Backup saved: backups/Cat8kv_2026-11-13.txt (183 lines)
+[+] Done. 1 device succeeded, 0 failed.
 ```
+
+---
+
+## Project Structure
+
+```
+backup_configs.py          # Main script
+inventory.yaml             # Your devices
+inventory-sandbox.yaml     # Cisco DevNet sandbox
+backups/                   # Generated backups (git-ignored)
+```
+
+---
 
 ## Roadmap
 
-- Ansible version of the same backup (`cisco.ios.ios_config` with `backup: yes`) against the same inventory.
+- [ ] Ansible version of the same backup workflow
+- [ ] Multi-vendor support (Arista, Fortinet, Juniper)
+- [ ] Basic compliance checks (NTP, AAA, logging)
+- [ ] Optional NetBox inventory source
+
+---
+
+## Author
+
+Antonio Bowden  
+Network Engineer | Orlando, FL  
+[GitHub](https://github.com/abowden101) · [Portfolio](https://abowden101.github.io/antonio-bowden-portfolio/)
