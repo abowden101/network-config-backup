@@ -1,106 +1,74 @@
-# Network Config Backup (Netmiko)
+# network-config-backup
 
-Simple, reliable Cisco IOS/IOS-XE running-config backup tool built with Netmiko.
+Automated Cisco IOS running-config backup over SSH with Netmiko. Point it at an inventory of devices and it pulls `show running-config` (plus a `show version` uptime check) and saves a dated backup per device.
 
-Point it at an inventory of devices and it:
-- Connects over SSH
-- Verifies the device is reachable
-- Pulls `show running-config`
-- Saves a timestamped backup per device
-- Continues on failure (one bad device doesn’t stop the rest)
-
-**Read-only** — it only runs `show` commands. Nothing is written to the devices.
+**Read-only on the device** — it runs `show` commands only and writes nothing to any switch.
 
 ---
 
-## Features
+## Requirements
 
-- Inventory-driven (YAML)
-- Password prompted at runtime (never stored)
-- Per-device timeout handling
-- Failure isolation
-- Works with Cisco DevNet always-on sandbox out of the box
-- Easy to extend for other platforms (Juniper, Arista, etc.)
+- Python 3.10+
+- `pip install -r requirements.txt` (netmiko, pyyaml)
 
----
+## Usage
 
-## Quick Start
-
-### 1. Install dependencies
-```bash
-pip install netmiko pyyaml
-```
-
-### 2. Configure inventory
-Edit `inventory.yaml`:
+1. Edit `inventory.yaml` — one entry per device:
 
 ```yaml
 devices:
   - host: 192.168.1.10
     device_type: cisco_ios
     username: admin
-  - host: 192.168.1.11
-    device_type: cisco_ios
-    username: admin
 ```
 
-### 3. Run the backup
+2. Run it and type the SSH password when prompted (it is never written to a file):
+
 ```bash
-python backup_configs.py
+python backup_configs.py [--inventory inventory.yaml]
 ```
 
-You will be prompted for the SSH password once. Backups are saved in the `backups/` folder as:
+3. Check `backups/` — one file per device, named `<hostname>_<date>.txt`. Run it again after a config change and `diff` the two files to see drift:
 
+```bash
+diff backups/Cat8kv_2026-11-12.txt backups/Cat8kv_2026-11-13.txt
 ```
-<hostname>_YYYY-MM-DD.txt
-```
 
----
+## Try it without hardware
 
-## Try It Instantly (No Lab Required)
-
-Use Cisco’s free always-on IOS-XE sandbox:
+`inventory-sandbox.yaml` points at Cisco's free DevNet always-on IOS XE sandbox (`sandbox-iosxe-latest-1.cisco.com`, Catalyst 8000v). The published demo login is `admin` / `C1sco12345`:
 
 ```bash
 python backup_configs.py --inventory inventory-sandbox.yaml
 ```
 
-Credentials are already in the sandbox inventory file (`admin` / `C1sco12345`).
+Verified 2026-11-13 against the sandbox (IOS XE 17.15): a 183-line running-config backup saved for `Cat8kv`.
 
----
+## How it works
 
-## Example Output
+- One SSH session per device via Netmiko (`cisco_ios`)
+- Verifies the connection first with `show version | include uptime` and the device prompt before trusting the output
+- Timeouts tuned for slow or shared devices (30s connect, 60s command)
+- A failure on one device is reported and the run continues with the rest
+- Credentials are never stored: username from inventory, password prompted at runtime with `getpass`
 
-```
-[+] Connecting to Cat8kv (sandbox-iosxe-latest-1.cisco.com)...
-[+] Backup saved: backups/Cat8kv_2026-11-13.txt (183 lines)
-[+] Done. 1 device succeeded, 0 failed.
-```
-
----
-
-## Project Structure
+## Project structure
 
 ```
-backup_configs.py          # Main script
-inventory.yaml             # Your devices
-inventory-sandbox.yaml     # Cisco DevNet sandbox
-backups/                   # Generated backups (git-ignored)
+backup_configs.py       # the backup script
+inventory.yaml          # your lab devices (placeholder addresses)
+inventory-sandbox.yaml  # Cisco DevNet always-on IOS XE sandbox
+requirements.txt        # pinned dependencies
+backups/                # generated backups (git-ignored)
+LICENSE                 # MIT
 ```
-
----
 
 ## Roadmap
 
-- [ ] Ansible version of the same backup workflow
-- [ ] Multi-vendor support (Arista, Fortinet, Juniper)
-- [ ] Basic compliance checks (NTP, AAA, logging)
-- [ ] Optional NetBox inventory source
-
----
+- Ansible version of the same backup (`cisco.ios.ios_config` with `backup: yes`) against the same inventory — see also [ansible-network-baseline](https://github.com/abowden101/ansible-network-baseline)
 
 ## Author
 
 Antonio Bowden  
-Network Engineer | Orlando, FL  
+Network Engineer · Orlando, FL  
 [GitHub](https://github.com/abowden101) · [Portfolio](https://abowden101.github.io/antonio-bowden-portfolio/)
